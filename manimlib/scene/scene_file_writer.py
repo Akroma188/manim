@@ -27,6 +27,7 @@ class SceneFileWriter(object):
         "png_mode": "RGBA",
         "save_last_frame": False,
         "movie_file_extension": ".mp4",
+        "gif_file_extension": ".gif",
         "livestreaming": False,
         "to_twitch": False,
         "twitch_key": None,
@@ -34,6 +35,7 @@ class SceneFileWriter(object):
         # TODO, address this in extract_scene et. al.
         "file_name": None,
         "output_directory": None,
+        "file_name": None,
     }
 
     def __init__(self, scene, **kwargs):
@@ -69,6 +71,12 @@ class SceneFileWriter(object):
                     file_name, self.movie_file_extension
                 )
             )
+            self.gif_file_path = os.path.join(
+                movie_dir,
+                add_extension_if_not_present(
+                    file_name, self.gif_file_extension
+                )
+            )
             self.partial_movie_directory = guarantee_existance(os.path.join(
                 movie_dir,
                 self.get_partial_movie_directory(),
@@ -81,7 +89,10 @@ class SceneFileWriter(object):
         return root if root else ext[1:]
 
     def get_default_file_name(self):
-        return self.scene.__class__.__name__
+        if self.file_name is None:
+            return self.scene.__class__.__name__
+        else:
+            return self.file_name
 
     def get_movie_directory(self):
         pixel_height = self.scene.camera.pixel_height
@@ -299,10 +310,19 @@ class SceneFileWriter(object):
             '-f', 'concat',
             '-safe', '0',
             '-i', file_list,
-            '-c', 'copy',
             '-loglevel', 'error',
-            movie_file_path
+            
         ]
+        if not self.save_as_gif:
+            commands +=[
+                '-c', 'copy',
+                movie_file_path
+            ]
+        if self.save_as_gif:
+            movie_file_path=self.gif_file_path
+            commands +=[
+                movie_file_path,
+            ]
         if not self.includes_sound:
             commands.insert(-1, '-an')
 

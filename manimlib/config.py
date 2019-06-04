@@ -48,9 +48,19 @@ def parse_cli():
             help="Render at a medium quality",
         ),
         parser.add_argument(
+            "--high_quality",
+            action="store_true",
+            help="Render at a high quality",
+        ),
+        parser.add_argument(
             "-g", "--save_pngs",
             action="store_true",
             help="Save each frame as a png",
+        ),
+        parser.add_argument(
+            "-i", "--save_as_gif",
+            action="store_true",
+            help="Save the video as gif",
         ),
         parser.add_argument(
             "-f", "--show_file_in_finder",
@@ -161,6 +171,7 @@ def get_configuration(args):
         "write_to_movie": args.write_to_movie or not args.save_last_frame,
         "save_last_frame": args.save_last_frame,
         "save_pngs": args.save_pngs,
+        "save_as_gif": args.save_as_gif,
         # If -t is passed in (for transparent), this will be RGBA
         "png_mode": "RGBA" if args.transparent else "RGB",
         "movie_file_extension": ".mov" if args.transparent else ".mp4",
@@ -210,6 +221,8 @@ def get_camera_configuration(args):
         camera_config.update(manimlib.constants.LOW_QUALITY_CAMERA_CONFIG)
     elif args.medium_quality:
         camera_config.update(manimlib.constants.MEDIUM_QUALITY_CAMERA_CONFIG)
+    elif args.high_quality:
+        camera_config.update(manimlib.constants.HIGH_QUALITY_CAMERA_CONFIG)
     else:
         camera_config.update(manimlib.constants.PRODUCTION_QUALITY_CAMERA_CONFIG)
 
