@@ -77,17 +77,23 @@ class SimpleGrid(ThreeDSceneSquareGrid):
 
     def construct(self):
 
+        # Meshgrid defining bounds of grid
         xx = np.arange(-3, 3)
         yy = np.arange(-3, 3)
 
+        # Side lenght of each square cell in the grid
         self.side_length = 0.9
 
-        r_channel = self.create_grid(xx, yy, fill_colors=(1,0.0,0.0), fill_opacities=0.8, stroke_colors=(1.0,1.0,1.0), side_length=1)
-
-        for cell in r_channel:
+        # Create a grid and display each cell in the grid
+        simple_grid = self.create_grid(xx, yy, fill_colors=(1.0, 0.0, 0.0), fill_opacities=0.8, stroke_colors=(1.0,1.0,1.0), side_length=1)
+        for cell in simple_grid:
             self.add(cell.square)
 
-        self.shift_grid(r_channel, step_size=self.side_length, x_increment=1)
+        self.wait(1)
+
+        self.move_camera(phi=PI/3, theta=0)
+
+        self.wait(1)
 
 
 class RGBConv(ThreeDSceneSquareGrid):
