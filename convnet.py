@@ -12,65 +12,82 @@ class ThreeDSceneSquareGrid(ThreeDScene):
 
     def create_grid(self, xx, yy, fill_colors, fill_opacities=0.8, stroke_colors=(1.0,1.0,1.0), side_length=1):
 
-        grid = []
 
-        class SquareCell:
-
-            def __init__(self, square, x, y):
-                self.square = square
-                self.x = x
-                self.y = y
+        class Grid:
 
 
-        for x in xx:
-            for y in yy:
+            def __init__(self, xx, yy, fill_colors, fill_opacities, stroke_colors, side_length):
 
-                    # RGB image (scaled to [0,1])
-                    if type(fill_colors) == np.ndarray and fill_colors.ndim == 3:
-                        fill_color_rgb = tuple(fill_colors[x,y, :])
-                    # Grayscalage image (scaled to [0.1])
-                    elif type(fill_colors) == np.ndarray and fill_colors.ndim == 2:
-                        fill_color_rgb = (fill_colors[x,y], fill_colors[x,y], fill_colors[x,y])
-                    # solid color, RGB Tuple
-                    elif type(fill_colors) == tuple and len(fill_colors) == 3:
-                        fill_color_rgb = fill_colors
+                class SquareCell:
+
+                    def __init__(self, square, x, y):
+                        self.square = square
+                        self.x = x
+                        self.y = y
+
+                self.xx = xx
+                self.yy = yy
+                self.fill_colors=fill_colors
+                self.fill_opacities = fill_opacities
+                self.stroke_colors = stroke_colors
+                self.side_length = side_length
 
 
-                    if type(stroke_colors) == np.ndarray and stroke_colors.ndim == 3:
-                        stroke_color_rgb = tuple(stroke_colors[x,y, :])
-                    elif type(stroke_colors) == np.ndarray and stroke_colors.ndim == 2:
-                        stroke_color_rgb = (stroke_colors[x,y], stroke_colors[x,y], fill_colors[x,y])
-                    elif type(stroke_colors) == tuple:
-                        stroke_color_rgb = stroke_colors
+                self.grid = []
 
-                    if type(fill_opacities) == int or type(fill_opacities) == float:
-                        fill_opacity = (fill_opacities, fill_opacities, fill_opacities)
-                    elif type(fill_opacities) == np.ndarray:
-                        fill_opacity = fill_opacities[x,y]
+                for x in xx:
+                    for y in yy:
 
-                    square = Square(side_length=side_length, fill_color=Color(rgb=fill_color_rgb), fill_opacity=fill_opacity, stroke_color=Color(rgb=stroke_color_rgb))
+                            # RGB image (scaled to [0,1])
+                            if type(fill_colors) == np.ndarray and fill_colors.ndim == 3:
+                                fill_color_rgb = tuple(fill_colors[x,y, :])
+                            # Grayscalage image (scaled to [0.1])
+                            elif type(fill_colors) == np.ndarray and fill_colors.ndim == 2:
+                                fill_color_rgb = (fill_colors[x,y], fill_colors[x,y], fill_colors[x,y])
+                            # solid color, RGB Tuple
+                            elif type(fill_colors) == tuple and len(fill_colors) == 3:
+                                fill_color_rgb = fill_colors
 
-                    cell = SquareCell(square, x, y)
 
-                    cell.square.set_x(x*side_length)
-                    cell.square.set_y(y*side_length)
+                            if type(stroke_colors) == np.ndarray and stroke_colors.ndim == 3:
+                                stroke_color_rgb = tuple(stroke_colors[x,y, :])
+                            elif type(stroke_colors) == np.ndarray and stroke_colors.ndim == 2:
+                                stroke_color_rgb = (stroke_colors[x,y], stroke_colors[x,y], fill_colors[x,y])
+                            elif type(stroke_colors) == tuple:
+                                stroke_color_rgb = stroke_colors
 
-                    grid.append(cell)
+                            if type(fill_opacities) == int or type(fill_opacities) == float:
+                                fill_opacity = (fill_opacities, fill_opacities, fill_opacities)
+                            elif type(fill_opacities) == np.ndarray:
+                                fill_opacity = fill_opacities[x,y]
+
+                            square = Square(side_length=side_length, fill_color=Color(rgb=fill_color_rgb), fill_opacity=fill_opacity, stroke_color=Color(rgb=stroke_color_rgb))
+
+                            cell = SquareCell(square, x, y)
+
+                            cell.square.set_x(x*side_length)
+                            cell.square.set_y(y*side_length)
+
+                            self.grid.append(cell)
+
+            def shift_grid(self, x_increment=None, y_increment=None, z_increment=None, step_size=self.side_length):
+                for cell in self.grid:
+                    if x_increment:
+                        current_x = cell.square.get_x()
+                        cell.square.set_x(current_x+x_increment*step_size)
+                    if y_increment:
+                        current_y = cell.square.get_y()
+                        cell.square.set_y(current_y+y_increment*step_size)
+                    if z_increment:
+                        current_z = cell.square.get_z()
+                        cell.square.set_z(current_z+z_increment*step_size)
+
+
+        grid = Grid(xx, yy, fill_colors, fill_opacities=0.8, stroke_colors=(1.0,1.0,1.0), side_length=self.side_length)
 
         return grid
 
 
-    def shift_grid(self, grid, step_size, x_increment=None, y_increment=None, z_increment=None):
-        for cell in grid:
-            if x_increment:
-                current_x = cell.square.get_x()
-                cell.square.set_x(current_x+x_increment*step_size)
-            if y_increment:
-                current_y = cell.square.get_y()
-                cell.square.set_y(current_y+y_increment*step_size)
-            if z_increment:
-                current_z = cell.square.get_z()
-                cell.square.set_z(current_z+z_increment*step_size)
 
 
 class SimpleGrid(ThreeDSceneSquareGrid):
@@ -85,8 +102,10 @@ class SimpleGrid(ThreeDSceneSquareGrid):
         self.side_length = 0.9
 
         # Create a grid and display each cell in the grid
-        simple_grid = self.create_grid(xx, yy, fill_colors=(1.0, 0.0, 0.0), fill_opacities=0.8, stroke_colors=(1.0,1.0,1.0), side_length=1)
-        for cell in simple_grid:
+        simple_grid = self.create_grid(xx, yy, fill_colors=(1.0, 0.0, 0.0), fill_opacities=0.8, stroke_colors=(1.0,1.0,1.0), side_length=self.side_length)
+
+        # Necessary to display grids initially
+        for cell in simple_grid.grid:
             self.add(cell.square)
 
         self.wait(1)
@@ -112,15 +131,18 @@ class RGBConv(ThreeDSceneSquareGrid):
 
         b_channel = self.create_grid(xx, yy, fill_colors=(0.0, 0.0, 1.0), fill_opacities=0.8, stroke_colors=(1.0,1.0,1.0), side_length=self.side_length)
 
-        # Display channels for the first time
+
+        convolution_output = self.create_grid(xx, yy, fill_colors=(0.0, 0.0, 0.0), side_length=self.side_length)
+
+        # Initialize the displaying of channels for the first time
         for channel in (r_channel, g_channel, b_channel):
-            for cell in channel:
+            for cell in channel.grid:
                 self.add(cell.square)
 
 
 
-        self.shift_grid(g_channel, x_increment=0.5, y_increment=0.5, z_increment=1, step_size=self.side_length)
-        self.shift_grid(b_channel, x_increment=1, y_increment=1, z_increment=2, step_size=self.side_length)
+        g_channel.shift_grid(x_increment=0.5, y_increment=0.5, z_increment=1)
+        b_channel.shift_grid(x_increment=1, y_increment=1, z_increment=2)
 
         self.wait(1)
         xx = np.arange(-3, 0)
@@ -133,12 +155,12 @@ class RGBConv(ThreeDSceneSquareGrid):
         b_kernel = self.create_grid(xx, yy, fill_colors=(0.0, 0.0, 0.5), fill_opacities=0.8, stroke_colors=(1.0,1.0,1.0), side_length=self.side_length)
 
         for kernel in (r_kernel, g_kernel, b_kernel):
-            for cell in kernel:
+            for cell in kernel.grid:
                 self.add(cell.square)
 
-        self.shift_grid(r_kernel, x_increment=-4, y_increment=0, z_increment=0, step_size=self.side_length)
-        self.shift_grid(g_kernel, x_increment=-3.5, y_increment=0.5, z_increment=1, step_size=self.side_length)
-        self.shift_grid(b_kernel, x_increment=-3, y_increment=1, z_increment=2, step_size=self.side_length)
+        r_kernel.shift_grid(x_increment=-4, y_increment=0, z_increment=0)
+        g_kernel.shift_grid(x_increment=-3.5, y_increment=0.5, z_increment=1)
+        b_kernel.shift_grid(x_increment=-3, y_increment=1, z_increment=2)
         self.move_camera(phi=PI/6, theta=0, frame_center=(0*self.side_length, 0*self.side_length, 1*self.side_length))
 
         self.wait(2)
@@ -147,66 +169,65 @@ class RGBConv(ThreeDSceneSquareGrid):
 
         self.wait(2)
 
-        # Separate kernels and channels
+        # Separate kernels and channels, overlap everything
         for _ in range(18):
-            self.shift_grid(r_kernel, self.side_length, y_increment=-0.5)
-            self.shift_grid(r_channel, self.side_length, y_increment=-0.5)
-            self.shift_grid(b_kernel, self.side_length, y_increment=0.5)
-            self.shift_grid(b_channel, self.side_length, y_increment=0.5)
+            r_kernel.shift_grid(y_increment=-0.5)
+            r_channel.shift_grid(y_increment=-0.5)
+            b_kernel.shift_grid(y_increment=0.5)
+            b_channel.shift_grid(y_increment=0.5)
             self.wait(0.08)
-
-
         for _ in range(8):
-            self.shift_grid(r_kernel, x_increment=0.5, step_size=self.side_length)
-            self.shift_grid(g_kernel, x_increment=0.5, step_size=self.side_length)
-            self.shift_grid(b_kernel, x_increment=0.5, step_size=self.side_length)
+            r_kernel.shift_grid(x_increment=0.5)
+            g_kernel.shift_grid(x_increment=0.5)
+            b_kernel.shift_grid(x_increment=0.5)
             self.wait(0.08)
 
         self.wait(1)
 
+        # Perform the convolutions
         for _ in range(3):
-            self.shift_grid(r_kernel, y_increment=1, step_size=self.side_length)
-            self.shift_grid(g_kernel, y_increment=1, step_size=self.side_length)
-            self.shift_grid(b_kernel, y_increment=1, step_size=self.side_length)
+            r_kernel.shift_grid(y_increment=1)
+            g_kernel.shift_grid(y_increment=1)
+            b_kernel.shift_grid(y_increment=1)
             self.wait(0.5)
 
-        self.shift_grid(r_kernel, x_increment=1, y_increment=-3, step_size=self.side_length)
-        self.shift_grid(g_kernel, x_increment=1, y_increment=-3, step_size=self.side_length)
-        self.shift_grid(b_kernel, x_increment=1, y_increment=-3, step_size=self.side_length)
+        r_kernel.shift_grid(x_increment=1, y_increment=-3)
+        g_kernel.shift_grid(x_increment=1, y_increment=-3)
+        b_kernel.shift_grid(x_increment=1, y_increment=-3)
         self.wait(0.5)
 
         for _ in range(3):
-            self.shift_grid(r_kernel, y_increment=1, step_size=self.side_length)
-            self.shift_grid(g_kernel, y_increment=1, step_size=self.side_length)
-            self.shift_grid(b_kernel, y_increment=1, step_size=self.side_length)
+            r_kernel.shift_grid(y_increment=1)
+            g_kernel.shift_grid(y_increment=1)
+            b_kernel.shift_grid(y_increment=1)
             self.wait(0.5)
 
-        self.shift_grid(r_kernel, x_increment=1, y_increment=-3, step_size=self.side_length)
-        self.shift_grid(g_kernel, x_increment=1, y_increment=-3, step_size=self.side_length)
-        self.shift_grid(b_kernel, x_increment=1, y_increment=-3, step_size=self.side_length)
+        r_kernel.shift_grid(x_increment=1, y_increment=-3)
+        g_kernel.shift_grid(x_increment=1, y_increment=-3)
+        b_kernel.shift_grid(x_increment=1, y_increment=-3)
         self.wait(0.5)
 
         for _ in range(3):
-            self.shift_grid(r_kernel, y_increment=1, step_size=self.side_length)
-            self.shift_grid(g_kernel, y_increment=1, step_size=self.side_length)
-            self.shift_grid(b_kernel, y_increment=1, step_size=self.side_length)
+            r_kernel.shift_grid(y_increment=1)
+            g_kernel.shift_grid(y_increment=1)
+            b_kernel.shift_grid(y_increment=1)
             self.wait(0.5)
 
-        self.shift_grid(r_kernel, x_increment=1, y_increment=-3, step_size=self.side_length)
-        self.shift_grid(g_kernel, x_increment=1, y_increment=-3, step_size=self.side_length)
-        self.shift_grid(b_kernel, x_increment=1, y_increment=-3, step_size=self.side_length)
+        r_kernel.shift_grid(x_increment=1, y_increment=-3)
+        g_kernel.shift_grid(x_increment=1, y_increment=-3)
+        b_kernel.shift_grid(x_increment=1, y_increment=-3)
         self.wait(0.5)
 
         for _ in range(3):
-            self.shift_grid(r_kernel, y_increment=1, step_size=self.side_length)
-            self.shift_grid(g_kernel, y_increment=1, step_size=self.side_length)
-            self.shift_grid(b_kernel, y_increment=1, step_size=self.side_length)
+            r_kernel.shift_grid(y_increment=1)
+            g_kernel.shift_grid(y_increment=1)
+            b_kernel.shift_grid(y_increment=1)
             self.wait(0.5)
 
         self.wait(1)
 
 
-class ConvNet(ThreeDSceneSquareGrid):
+class Conv2D(ThreeDSceneSquareGrid):
 
     def construct(self):
 
@@ -215,9 +236,9 @@ class ConvNet(ThreeDSceneSquareGrid):
         xx = np.arange(-3,3)
         yy = np.arange(-3,3)
 
-        grid = self.create_grid(xx, yy, fill_colors=(0.1, 0.1, 0.1), side_length=self.side_length)
+        simple_grid = self.create_grid(xx, yy, fill_colors=(0.1, 0.1, 0.1), side_length=self.side_length)
 
-        for cell in grid:
+        for cell in simple_grid.grid:
             self.add(cell.square)
 
         self.move_camera(phi=3*PI/8,gamma=0)
@@ -231,21 +252,21 @@ class ConvNet(ThreeDSceneSquareGrid):
 
         kernel = self.create_grid(xx, yy, fill_colors=(0.4,0.4,0.4), side_length=self.side_length)
 
-        for cell in kernel:
+        for cell in kernel.grid:
             self.add(cell.square)
 
         self.wait(2)
 
         for _ in range(3):
-            self.shift_grid(kernel, step_size=self.side_length, x_increment=1)
+            kernel.shift_grid(x_increment=1)
             self.wait(1)
 
         self.move_camera(phi=0,gamma=0, distance=50)
-        self.shift_grid(kernel, step_size=self.side_length, x_increment=-3, y_increment=1)
+        kernel.shift_grid(x_increment=-3, y_increment=1)
         self.wait(1)
 
         for _ in range(3):
-            self.shift_grid(kernel, step_size=self.side_length, x_increment=1)
+            kernel.shift_grid(x_increment=1)
             self.wait(1)
         self.begin_ambient_camera_rotation()
 
@@ -271,7 +292,7 @@ class MnistConvNet(ThreeDSceneSquareGrid):
 
         # Define grid + show mnist digit
         mnist_grid = self.create_grid(xx, yy, fill_colors=self.sample_image, fill_opacities=1, side_length=self.side_length)
-        for cell in mnist_grid:
+        for cell in mnist_grid.grid:
             self.add(cell.square)
 
         xx = np.arange(-3, 0)
@@ -283,22 +304,22 @@ class MnistConvNet(ThreeDSceneSquareGrid):
 
         kernel = self.create_grid(xx, yy, fill_colors=(0.5, 0.8, 0.4), side_length=self.side_length)
 
-        for cell in kernel:
+        for cell in kernel.grid:
             self.add(cell.square)
 
-        self.shift_grid(kernel, step_size=self.side_length, x_increment=1)
+        kernel.shift_grid(x_increment=1)
         self.wait(2)
 
         for _ in range(28):
-            self.shift_grid(kernel, step_size=self.side_length, y_increment=1)
+            kernel.shift_grid(y_increment=1)
             self.wait(0.1)
         #
-        self.shift_grid(kernel, step_size=self.side_length, x_increment=1, y_increment=-14)
-        self.shift_grid(kernel, step_size=self.side_length, x_increment=14)
+        kernel.shift_grid(x_increment=1, y_increment=-14)
+        kernel.shift_grid(x_increment=14)
         self.wait(1)
 
         self.move_camera(phi=PI/6, theta=0, frame_center=(14*self.side_length, 14*self.side_length, 1*self.side_length))
         for _ in range(10):
-            self.shift_grid(kernel, step_size=self.side_length, y_increment=1)
+            kernel.shift_grid(y_increment=1)
             self.wait(0.1)
         self.wait(2)
