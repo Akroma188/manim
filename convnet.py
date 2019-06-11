@@ -38,30 +38,7 @@ class ThreeDSceneSquareGrid(ThreeDScene):
                 for x in xx:
                     for y in yy:
 
-                            # RGB image (scaled to [0,1])
-                            if type(fill_colors) == np.ndarray and fill_colors.ndim == 3:
-                                fill_color_rgb = tuple(fill_colors[x,y, :])
-                            # Grayscalage image (scaled to [0.1])
-                            elif type(fill_colors) == np.ndarray and fill_colors.ndim == 2:
-                                fill_color_rgb = (fill_colors[x,y], fill_colors[x,y], fill_colors[x,y])
-                            # solid color, RGB Tuple
-                            elif type(fill_colors) == tuple and len(fill_colors) == 3:
-                                fill_color_rgb = fill_colors
-
-
-                            if type(stroke_colors) == np.ndarray and stroke_colors.ndim == 3:
-                                stroke_color_rgb = tuple(stroke_colors[x,y, :])
-                            elif type(stroke_colors) == np.ndarray and stroke_colors.ndim == 2:
-                                stroke_color_rgb = (stroke_colors[x,y], stroke_colors[x,y], fill_colors[x,y])
-                            elif type(stroke_colors) == tuple:
-                                stroke_color_rgb = stroke_colors
-
-                            if type(fill_opacities) == int or type(fill_opacities) == float:
-                                fill_opacity = (fill_opacities, fill_opacities, fill_opacities)
-                            elif type(fill_opacities) == np.ndarray:
-                                fill_opacity = fill_opacities[x,y]
-
-                            square = Square(side_length=side_length, fill_color=Color(rgb=fill_color_rgb), fill_opacity=fill_opacity, stroke_color=Color(rgb=stroke_color_rgb))
+                            square = Square(side_length=side_length)
 
                             cell = SquareCell(square, x, y)
 
@@ -69,6 +46,76 @@ class ThreeDSceneSquareGrid(ThreeDScene):
                             cell.square.set_y(y*side_length)
 
                             self.grid.append(cell)
+
+                self = self.update_strokes(stroke_colors=self.stroke_colors)
+                self = self.update_fill_colors(fill_colors=self.fill_colors)
+                self = self.update_opacities(fill_opacities=self.fill_opacities)
+
+            def colors2rgb(self, colors, x, y):
+                # RGB image (scaled to [0,1])
+                if type(colors) == np.ndarray and colors.ndim == 3:
+                    color_rgb = tuple(fill_colors[x,y, :])
+                # Grayscalage image (scaled to [0.1])
+                elif type(colors) == np.ndarray and colors.ndim == 2:
+                    color_rgb = (colors[x,y], colors[x,y], colors[x,y])
+                # solid color, RGB Tuple
+                elif type(colors) == tuple and len(colors) == 3:
+                    color_rgb = colors
+                else:
+                    raise ValueError("Check color type")
+
+                return color_rgb
+
+
+            def update_fill_colors(self, fill_colors):
+                cell_count = 0
+                for x in xx:
+                    for y in yy:
+
+                        fill_color_rgb=self.colors2rgb(fill_colors, x, y)
+
+                        self.grid[cell_count].square.set_fill(color=Color(rgb=fill_color_rgb))
+                        cell_count+=1
+
+                self.fill_colors = fill_colors
+
+                return self
+
+
+            def update_opacities(self, fill_opacities):
+                cell_count = 0
+                for x in xx:
+                    for y in yy:
+
+                        if type(fill_opacities) == int or type(fill_opacities) == float:
+                            fill_opacity = (fill_opacities, fill_opacities, fill_opacities)
+                        elif type(fill_opacities) == np.ndarray:
+                            fill_opacity = fill_opacities[x,y]
+
+
+                        self.grid[cell_count].square.set_opacity(fill_opacity)
+                        cell_count+=1
+
+                self.fill_opacities = fill_opacities
+
+                return self
+
+            def update_strokes(self, stroke_colors):
+
+                cell_count = 0
+                for x in xx:
+                    for y in yy:
+
+                        stroke_color_rgb=self.colors2rgb(stroke_colors, x, y)
+
+                        self.grid[cell_count].square.set_stroke(color=Color(rgb=stroke_color_rgb))
+                        cell_count+=1
+
+                self.stroke_colors = stroke_colors
+
+                return self
+
+
 
             def shift_grid(self, x_increment=None, y_increment=None, z_increment=None, step_size=self.side_length):
                 for cell in self.grid:
@@ -82,15 +129,10 @@ class ThreeDSceneSquareGrid(ThreeDScene):
                         current_z = cell.square.get_z()
                         cell.square.set_z(current_z+z_increment*step_size)
 
-
-        grid = Grid(xx, yy, fill_colors, fill_opacities=0.8, stroke_colors=(1.0,1.0,1.0), side_length=self.side_length)
-
-        return grid
+        return Grid(xx, yy, fill_colors, fill_opacities=0.8, stroke_colors=(1.0,1.0,1.0), side_length=self.side_length)
 
 
-
-
-class SimpleGrid(ThreeDSceneSquareGrid):
+class SimpleGridExample(ThreeDSceneSquareGrid):
 
     def construct(self):
 
@@ -98,7 +140,7 @@ class SimpleGrid(ThreeDSceneSquareGrid):
         xx = np.arange(-3, 3)
         yy = np.arange(-3, 3)
 
-        # Side lenght of each square cell in the grid
+        # Side length of each square cell in the grid
         self.side_length = 0.9
 
         # Create a grid and display each cell in the grid
@@ -108,12 +150,16 @@ class SimpleGrid(ThreeDSceneSquareGrid):
         for cell in simple_grid.grid:
             self.add(cell.square)
 
+
         self.wait(1)
 
         self.move_camera(phi=PI/3, theta=0)
 
         self.wait(1)
 
+        simple_grid.update_fill_colors(fill_colors=(0.7, 0.7, 0.2))
+
+        self.wait(1)
 
 class RGBConv(ThreeDSceneSquareGrid):
 
@@ -139,16 +185,12 @@ class RGBConv(ThreeDSceneSquareGrid):
             for cell in channel.grid:
                 self.add(cell.square)
 
-
-
         g_channel.shift_grid(x_increment=0.5, y_increment=0.5, z_increment=1)
         b_channel.shift_grid(x_increment=1, y_increment=1, z_increment=2)
 
         self.wait(1)
         xx = np.arange(-3, 0)
         yy = np.arange(-3, 0)
-
-        #  self.side_length = 0.7
 
         r_kernel = self.create_grid(xx, yy, fill_colors=(0.5,0.0,0.0), fill_opacities=0.8, stroke_colors=(1.0,1.0,1.0), side_length=self.side_length)
         g_kernel = self.create_grid(xx, yy, fill_colors=(0.0,0.5,0.0), fill_opacities=0.8, stroke_colors=(1.0,1.0,1.0), side_length=self.side_length)
