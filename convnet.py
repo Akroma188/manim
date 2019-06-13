@@ -43,8 +43,7 @@ class ThreeDSceneSquareGrid(ThreeDScene):
 
                             self.grid.append(cell)
 
-                self = self.update_strokes(stroke_colors=self.stroke_colors)
-                self = self.update_fill_colors(fill_colors=self.fill_colors)
+                self = self.update_colors(fill_colors=self.fill_colors, stroke_colors=self.stroke_colors)
                 self = self.update_opacities(fill_opacities=self.fill_opacities)
 
             def colors2rgb(self, colors, x, y):
@@ -62,17 +61,20 @@ class ThreeDSceneSquareGrid(ThreeDScene):
 
                 return color_rgb
 
-            def update_fill_colors(self, fill_colors):
+            def update_colors(self, fill_colors=None, stroke_colors=None):
                 cell_count = 0
                 for x in xx:
                     for y in yy:
 
-                        fill_color_rgb = self.colors2rgb(fill_colors, x, y)
+                        fill_color = Color(rgb=self.colors2rgb(fill_colors, x, y)) if fill_colors is not None else None
 
-                        self.grid[cell_count].square.set_fill(color=Color(rgb=fill_color_rgb))
+                        stroke_color = Color(rgb=self.colors2rgb(stroke_colors, x, y)) if stroke_colors is not None else None
+
+                        self.grid[cell_count].square.set_color(fill_color=fill_color, stroke_color=stroke_color)
                         cell_count += 1
 
                 self.fill_colors = fill_colors
+                self.stroke_colors = stroke_colors
 
                 return self
 
@@ -90,21 +92,6 @@ class ThreeDSceneSquareGrid(ThreeDScene):
                         cell_count += 1
 
                 self.fill_opacities = fill_opacities
-
-                return self
-
-            def update_strokes(self, stroke_colors):
-
-                cell_count = 0
-                for x in xx:
-                    for y in yy:
-
-                        stroke_color_rgb = self.colors2rgb(stroke_colors, x, y)
-
-                        self.grid[cell_count].square.set_stroke(color=Color(rgb=stroke_color_rgb))
-                        cell_count += 1
-
-                self.stroke_colors = stroke_colors
 
                 return self
 
@@ -147,7 +134,7 @@ class SimpleGridExample(ThreeDSceneSquareGrid):
 
         self.wait(1)
 
-        simple_grid.update_fill_colors(fill_colors=(0.7, 0.7, 0.2))
+        simple_grid.update_colors(fill_colors=(0.7, 0.7, 0.2))
 
         self.wait(1)
 
