@@ -70,7 +70,8 @@ class ThreeDSceneSquareGrid(ThreeDScene):
 
                         stroke_color = Color(rgb=self.colors2rgb(stroke_colors, x, y)) if stroke_colors is not None else None
 
-                        self.grid[cell_count].square.set_color(fill_color=fill_color, stroke_color=stroke_color)
+                        self.grid[cell_count].square.set_fill(color=fill_color)
+                        self.grid[cell_count].square.set_stroke(color=stroke_color)
                         cell_count += 1
 
                 self.fill_colors = fill_colors
