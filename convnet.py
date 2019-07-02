@@ -246,6 +246,49 @@ class RGBConv(ThreeDSceneSquareGrid):
 
         self.wait(1)
 
+class Conv2D(ThreeDSceneSquareGrid):
+
+    def construct(self):
+
+        self.side_length = 0.9
+
+        xx = np.arange(-3, 3)
+        yy = np.arange(-3, 3)
+
+        simple_grid = self.create_grid(xx, yy, fill_colors=(0.1, 0.1, 0.1), side_length=self.side_length)
+
+        for cell in simple_grid.grid:
+            self.add(cell.square)
+
+        self.move_camera(phi=3*PI/8, gamma=0)
+
+        xx = np.arange(-3, 0)
+        yy = np.arange(-3, 0)
+
+        # Dilated kernel
+        #  xx = np.arange(-3, 3, step=2)
+        #  yy = np.arange(-3, 3, step=2)
+
+        kernel = self.create_grid(xx, yy, fill_colors=(0.4, 0.4, 0.4), side_length=self.side_length)
+
+        for cell in kernel.grid:
+            self.add(cell.square)
+
+        self.wait(2)
+
+        for _ in range(3):
+            kernel.shift_grid(x_increment=1)
+            self.wait(1)
+
+        self.move_camera(phi=0, gamma=0, distance=50)
+        kernel.shift_grid(x_increment=-3, y_increment=1)
+        self.wait(1)
+
+        for _ in range(3):
+            kernel.shift_grid(x_increment=1)
+            self.wait(1)
+        self.begin_ambient_camera_rotation()
+
 
 class Conv2D(ThreeDSceneSquareGrid):
 
