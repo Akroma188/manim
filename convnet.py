@@ -31,8 +31,8 @@ class ThreeDSceneSquareGrid(ThreeDScene):
 
                 self.grid = []
 
-                for x in xx:
-                    for y in yy:
+                for y in reversed(yy):
+                    for x in xx:
 
                             square = Square(side_length=side_length)
 
@@ -63,8 +63,8 @@ class ThreeDSceneSquareGrid(ThreeDScene):
 
             def update_colors(self, fill_colors=None, stroke_colors=None):
                 cell_count = 0
-                for x in xx:
-                    for y in yy:
+                for x in range(len(xx)):
+                    for y in range(len(yy)):
 
                         fill_color = Color(rgb=self.colors2rgb(fill_colors, x, y)) if fill_colors is not None else None
 
