@@ -7,7 +7,6 @@ from colour import Color
 from torchvision.datasets import MNIST
 
 
-
 class ThreeDSceneSquareGrid(ThreeDScene):
 
     def create_grid(self, xx, yy, fill_colors, fill_opacities=0.8, stroke_colors=(1.0, 1.0, 1.0), side_length=1):
@@ -278,7 +277,6 @@ class Conv1D(ThreeDSceneSquareGrid):
 
 
 
-
 class Conv2D(ThreeDSceneSquareGrid):
 
     def construct(self):
@@ -324,6 +322,54 @@ class Conv2D(ThreeDSceneSquareGrid):
                 kernel.shift_grid(x_increment=-3, y_increment=-1)
 
         self.wait(2)
+
+
+class Conv2D_dilated(ThreeDSceneSquareGrid):
+
+    def construct(self):
+
+        self.side_length = 0.9
+
+        self.move_camera(phi=3*PI/8, gamma=0)
+        xx = np.arange(-6, 0)
+        yy = np.arange(-3, 3)
+
+        simple_grid = self.create_grid(xx, yy, fill_colors=(0, 0, 0.9), side_length=self.side_length)
+
+        conv_result = self.create_grid(np.arange(4, 6), np.arange(-1, 1), fill_colors=(0, 0.8, 0), side_length=self.side_length)
+
+        for cell in simple_grid.grid:
+            self.add(cell.square)
+
+        # Dilated kernel
+        xx = np.arange(-6, 0, step=2)
+        yy = np.arange(-2, 4, step=2)
+
+        kernel = self.create_grid(xx, yy, fill_colors=(1, 1, 0), side_length=self.side_length)
+
+        for cell in kernel.grid:
+            self.add(cell.square)
+
+        self.wait(2)
+        self.move_camera(phi=0, gamma=0, distance=50)
+
+        count = 0
+        for _ in range(2):
+            for jj in range(2):
+
+                if count < len(conv_result.grid):
+
+                    self.add(conv_result.grid[count].square)
+                    count += 1
+                    self.wait(0.5)
+                    if jj != 1:
+                        kernel.shift_grid(x_increment=1)
+
+            if count < len(conv_result.grid):
+                kernel.shift_grid(x_increment=-1, y_increment=-1)
+
+        self.wait(2)
+
 
 class Conv2D_strided(ThreeDSceneSquareGrid):
 
