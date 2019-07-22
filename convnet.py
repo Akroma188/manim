@@ -7,6 +7,7 @@ from colour import Color
 from torchvision.datasets import MNIST
 
 
+
 class ThreeDSceneSquareGrid(ThreeDScene):
 
     def create_grid(self, xx, yy, fill_colors, fill_opacities=0.8, stroke_colors=(1.0, 1.0, 1.0), side_length=1):
@@ -276,6 +277,8 @@ class Conv1D(ThreeDSceneSquareGrid):
         self.wait(1)
 
 
+
+
 class Conv2D(ThreeDSceneSquareGrid):
 
     def construct(self):
@@ -321,6 +324,144 @@ class Conv2D(ThreeDSceneSquareGrid):
                 kernel.shift_grid(x_increment=-3, y_increment=-1)
 
         self.wait(2)
+
+class Conv2D_strided(ThreeDSceneSquareGrid):
+
+    def construct(self):
+
+        self.side_length = 0.9
+
+        self.move_camera(phi=3*PI/8, gamma=0)
+        xx = np.arange(-6, 0)
+        yy = np.arange(-3, 3)
+
+        simple_grid = self.create_grid(xx, yy, fill_colors=(0, 0, 0.9), side_length=self.side_length)
+
+        conv_result = self.create_grid(np.arange(3, 7), np.arange(-2, 2), fill_colors=(0, 0.8, 0), side_length=self.side_length)
+
+        for cell in simple_grid.grid:
+            self.add(cell.square)
+
+
+        xx = np.arange(-6, -3)
+        yy = np.arange(0, 3)
+
+        kernel = self.create_grid(xx, yy, fill_colors=(1, 1, 0), side_length=self.side_length)
+
+        for cell in kernel.grid:
+            self.add(cell.square)
+
+        self.wait(2)
+        self.move_camera(phi=0, gamma=0, distance=50)
+
+        count = 0
+        for _ in range(4):
+            for jj in range(4):
+
+                if count < len(conv_result.grid):
+
+                    self.add(conv_result.grid[count].square)
+                    count += 1
+                    self.wait(0.5)
+                    if jj != 3:
+                        kernel.shift_grid(x_increment=1)
+
+            if count < len(conv_result.grid):
+                kernel.shift_grid(x_increment=-3, y_increment=-1)
+
+        self.wait(2)
+
+class Conv2D_depth(ThreeDSceneSquareGrid):
+
+    def construct(self):
+
+        self.side_length = 0.9
+
+        self.move_camera(phi=3*PI/8, gamma=0)
+        xx = np.arange(-6, 0)
+        yy = np.arange(-3, 3)
+
+        simple_grid = self.create_grid(xx, yy, fill_colors=(0, 0, 0.9), side_length=self.side_length)
+
+        conv_result = self.create_grid(np.arange(3, 7), np.arange(-2, 2), fill_colors=(0, 0.8, 0), side_length=self.side_length)
+
+        conv_result_2 = self.create_grid(np.arange(3, 7), np.arange(-2, 2), fill_colors=(0, 153/255, 76/255), side_length=self.side_length)
+        conv_result_2.shift_grid(x_increment=0.5, y_increment=0.5, z_increment=0.5)
+
+        for cell in simple_grid.grid:
+            self.add(cell.square)
+
+
+        xx = np.arange(-6, -3)
+        yy = np.arange(0, 3)
+
+        kernel = self.create_grid(xx, yy, fill_colors=(1, 1, 0), side_length=self.side_length)
+
+        for cell in kernel.grid:
+            self.add(cell.square)
+
+        self.wait(2)
+        self.move_camera(phi=0, gamma=0, distance=50)
+
+        # First depth conv
+        count = 0
+        for _ in range(4):
+            for jj in range(4):
+
+                if count < len(conv_result.grid):
+
+                    self.add(conv_result.grid[count].square)
+                    count += 1
+                    self.wait(0.15)
+                    if jj != 3:
+                        kernel.shift_grid(x_increment=1)
+
+            if count < len(conv_result.grid):
+                kernel.shift_grid(x_increment=-3, y_increment=-1)
+
+
+        self.wait(1)
+
+        kernel.shift_grid(x_increment=-3, y_increment=3)
+        kernel.update_colors(fill_colors=(1, 0.5, 0))
+
+        self.wait(2)
+
+        # Second depth conv
+        count = 0
+        for _ in range(4):
+            for jj in range(4):
+
+                if count < len(conv_result.grid):
+
+                    self.add(conv_result_2.grid[count].square)
+                    count += 1
+                    self.wait(0.15)
+                    if jj != 3:
+                        kernel.shift_grid(x_increment=1)
+
+            if count < len(conv_result.grid):
+                kernel.shift_grid(x_increment=-3, y_increment=-1)
+
+        self.wait(2)
+
+        # Remove kernel
+        for cell in kernel.grid:
+            self.remove(cell.square)
+
+        # Add a bunch of depth layers
+
+        self.move_camera(phi=0, gamma=0, distance=50, frame_center=(0, 0, 20*self.side_length))
+        for n in range(1, 4):
+            conv_result_n = self.create_grid(np.arange(3, 7), np.arange(-2, 2), fill_colors=(0.2*n, 153/255 + 0.1*n, 76/255 + 0.1*n), side_length=self.side_length)
+            conv_result_n.shift_grid(x_increment=0.5*(n+2), y_increment=0.5*(n+2), z_increment=0.5*(n+2))
+
+            for cell in conv_result_n.grid:
+                self.add(cell.square)
+            self.wait(0.5)
+
+        self.wait(2)
+
 
 
 class Conv2D_stride(ThreeDSceneSquareGrid):
@@ -395,8 +536,17 @@ class Conv2D_zeropad(ThreeDSceneSquareGrid):
         yy = np.arange(-3, 3)
 
         simple_grid = self.create_grid(xx, yy, fill_colors=(0, 0, 0.9), side_length=self.side_length)
-
         conv_result = self.create_grid(np.arange(2, 8), yy, fill_colors=(0, 0.8, 0), side_length=self.side_length)
+
+        xx = np.arange(-7, 1)
+        yy = np.arange(-4, 4)
+
+        #  zero_colors = np.zeros((
+        zero_pad = self.create_grid(xx, yy, fill_colors=(0.5, 0.5, 0.5))
+
+
+        for cell in zero_pad.grid:
+            self.add(cell.square)
 
         for cell in simple_grid.grid:
             self.add(cell.square)
@@ -415,7 +565,9 @@ class Conv2D_zeropad(ThreeDSceneSquareGrid):
             self.add(cell.square)
 
         self.wait(2)
-        self.move_camera(phi=0, gamma=0, distance=50)
+        self.move_camera(phi=0, gamma=0, frame_center=(0, 0, 10*self.side_length))
+
+        self.wait(0.5)
 
         count = 0
         for _ in range(6):
@@ -425,7 +577,7 @@ class Conv2D_zeropad(ThreeDSceneSquareGrid):
 
                     self.add(conv_result.grid[count].square)
                     count += 1
-                    self.wait(0.5)
+                    self.wait(0.3)
                     if jj != 5:
                         kernel.shift_grid(x_increment=1)
 
