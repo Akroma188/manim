@@ -442,11 +442,14 @@ class Conv2D_dilated(ThreeDSceneSquareGrid):
 
         kernel = self.create_grid(xx, yy, fill_colors=(1, 1, 0), side_length=self.side_length)
 
+
+        self.move_camera(phi=0, gamma=0, distance=50)
+        self.wait(1)
+
         for cell in kernel.grid:
             self.add(cell.square)
 
-        self.wait(2)
-        self.move_camera(phi=0, gamma=0, distance=50)
+        self.wait(1)
 
         count = 0
         for _ in range(2):
