@@ -235,6 +235,101 @@ class RGBConv(ThreeDSceneSquareGrid):
         self.wait(3)
 
 
+class RGB_vol2vol(ThreeDSceneSquareGrid):
+
+    def construct(self):
+        self.side_length = 0.9
+
+        xx = np.arange(-3, 3)
+        yy = np.arange(-3, 3)
+
+        self.move_camera(frame_center=(0 * self.side_length, 5 * self.side_length, 50 * self.side_length))
+
+        r_channel = self.create_grid(xx, yy, fill_colors=(1.0, 0.0, 0.0), fill_opacities=0.8, stroke_colors=(1.0, 1.0, 1.0), side_length=self.side_length)
+        g_channel = self.create_grid(xx, yy, fill_colors=(0.0, 1.0, 0.0), fill_opacities=0.8, stroke_colors=(1.0, 1.0, 1.0), side_length=self.side_length)
+        b_channel = self.create_grid(xx, yy, fill_colors=(0.0, 0.0, 1.0), fill_opacities=0.8, stroke_colors=(1.0, 1.0, 1.0), side_length=self.side_length)
+
+
+        # Initialize the displaying of channels for the first time
+        for channel in (r_channel, g_channel, b_channel):
+            for cell in channel.grid:
+                self.add(cell.square)
+
+        r_channel.shift_grid(y_increment=10)
+        g_channel.shift_grid(x_increment=0.5, y_increment=10, z_increment=1)
+        b_channel.shift_grid(x_increment=1, y_increment=10, z_increment=2)
+
+
+        self.wait(1)
+
+
+
+        for n in range(4):
+
+            # Add kernels
+            xx = np.arange(-9, -6)
+            yy = np.arange(-3, 0)
+            r_kernel = self.create_grid(xx, yy, fill_colors=(0.5, 0.0, 0.0), fill_opacities=0.8, stroke_colors=(1.0, 1.0, 1.0), side_length=self.side_length)
+            g_kernel = self.create_grid(xx, yy, fill_colors=(0.0, 0.5, 0), fill_opacities=0.8, stroke_colors=(1.0, 1.0, 1.0), side_length=self.side_length)
+            b_kernel = self.create_grid(xx, yy, fill_colors=(0, 0.0, 0.5), fill_opacities=0.8, stroke_colors=(1.0, 1.0, 1.0), side_length=self.side_length)
+
+            for kernel in (r_kernel, g_kernel, b_kernel):
+                for cell in kernel.grid:
+                    self.add(cell.square)
+
+            r_kernel.shift_grid(x_increment=0 + 5*n, y_increment=6, z_increment=0)
+            g_kernel.shift_grid(x_increment=0.5 + 5*n, y_increment=6, z_increment=1)
+            b_kernel.shift_grid(x_increment=1 + 5*n, y_increment=6, z_increment=2)
+            self.wait(0.5)
+
+            # Add conv result
+            #  conv_result_n = self.create_grid(np.arange(-2, 4), np.arange(-4, 2), fill_colors=(0.2*n, 153/255 + 0.1*n, 76/255 + 0.1*n), side_length=self.side_length)
+            conv_result_n = self.create_grid(np.arange(-4, 2), np.arange(-4, 2), fill_colors=(204/255, 204/255 - 0.1*n, 76/255 + 0.1*n), side_length=self.side_length)
+            conv_result_n.shift_grid(x_increment=0.5*(n+2), z_increment=1*(n+2))
+
+            for cell in conv_result_n.grid:
+                self.add(cell.square)
+            self.wait(0.5)
+
+        self.wait(2)
+
+class RGB_vol2vol_2(ThreeDSceneSquareGrid):
+
+    def construct(self):
+        self.side_length = 0.9
+        self.move_camera(frame_center=(5 * self.side_length, 5 * self.side_length, 60 * self.side_length))
+
+        # Place input volume
+        for n in range(4):
+
+            input_volume_n = self.create_grid(np.arange(-4, 2), np.arange(6, 12), fill_colors=(204/255, 204/255 - 0.1*n, 76/255 + 0.1*n), side_length=self.side_length)
+            input_volume_n.shift_grid(x_increment=0.5*(n+2), z_increment=1*(n+2))
+
+            for cell in input_volume_n.grid:
+                self.add(cell.square)
+
+
+        self.wait(1)
+        for j in range(8):
+            # Add kernels
+            for n in range(4):
+                kernel_n = self.create_grid(np.arange(-20, -17), np.arange(0, 3), fill_colors=(204/255, 204/255 - 0.1*n, 76/255 + 0.1*n), side_length=self.side_length)
+                kernel_n.shift_grid(x_increment=0.5*(n+2)+j*6, z_increment=1*(n+2))
+
+                for cell in kernel_n.grid:
+                    self.add(cell.square)
+
+            self.wait(0.25)
+            # Add output
+            output_volume_n = self.create_grid(np.arange(-4, 2), np.arange(-9, -3), fill_colors=(51/255, 1 - 0.1*j, 1 - 0.1*j), side_length=self.side_length)
+            output_volume_n.shift_grid(x_increment=0.5*(j+2), z_increment=1*(j+2))
+
+            for cell in output_volume_n.grid:
+                self.add(cell.square)
+
+            self.wait(0.5)
+        self.wait(2)
+
 class Conv1D(ThreeDSceneSquareGrid):
 
     def construct(self):
@@ -498,7 +593,7 @@ class Conv2D_depth(ThreeDSceneSquareGrid):
         # Add a bunch of depth layers
 
         self.move_camera(phi=0, gamma=0, distance=50, frame_center=(0, 0, 20*self.side_length))
-        for n in range(1, 4):
+        for n in range(4):
             conv_result_n = self.create_grid(np.arange(3, 7), np.arange(-2, 2), fill_colors=(0.2*n, 153/255 + 0.1*n, 76/255 + 0.1*n), side_length=self.side_length)
             conv_result_n.shift_grid(x_increment=0.5*(n+2), y_increment=0.5*(n+2), z_increment=0.5*(n+2))
 
