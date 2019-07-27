@@ -143,6 +143,78 @@ class SimpleGridExample(ThreeDSceneSquareGrid):
         self.wait(1)
 
 
+class OnebyOneConv(ThreeDSceneSquareGrid):
+
+    def construct(self):
+
+        # Meshgrid defining bounds of grid
+        xx = np.arange(-6, -2)
+        yy = np.arange(-3, 1)
+
+        # Side length of each square cell in the grid
+        self.side_length = 0.9
+
+        #  self.move_camera(theta=0.2, gamma=0.2, frame_center=(0, 0, 10))
+        #  self.move_camera(alpha=0 )
+
+
+        r_colors = np.zeros(((len(xx), len(yy), 3)))
+        r_colors[:,:,0] = 1
+
+        g_colors = np.zeros(((len(xx), len(yy), 3)))
+        g_colors[:,:,1] = 1
+
+        b_colors = np.zeros(((len(xx), len(yy), 3)))
+        b_colors[:,:,2] = 1
+
+        # Create a grid and display each cell in the grid
+        r_channel = self.create_grid(xx, yy, fill_colors=(1.0, 0.0, 0.0), fill_opacities=0.8, stroke_colors=(1.0, 1.0, 1.0), side_length=self.side_length)
+        g_channel = self.create_grid(xx, yy, fill_colors=(0, 1.0, 0.0), fill_opacities=0.6, stroke_colors=(1.0, 1.0, 1.0), side_length=self.side_length)
+        b_channel = self.create_grid(xx, yy, fill_colors=(0, 0, 1.0), fill_opacities=0.5, stroke_colors=(1.0, 1.0, 1.0), side_length=self.side_length)
+
+        #  conv_out = self.create_grid(xx, yy, fill_colors=(0, 0, 1.0), fill_opacities=0.8, stroke_colors=(1.0, 1.0, 1.0), side_length=self.side_length)
+
+        conv_result = self.create_grid(xx+3+len(xx), yy, fill_colors=(204/255, 204/255 - 0.1, 76/255 + 0.1), side_length=self.side_length)
+
+
+        for count, grid in enumerate([r_channel, g_channel, b_channel]):
+
+            # Necessary to display grids initially
+            grid.shift_grid(x_increment=count*1, y_increment=count*0.8, z_increment=count)
+            for cell in grid.grid:
+                self.add(cell.square)
+
+        self.wait(1)
+
+        count = 0
+        for x in range(len(xx)):
+            for y in range(len(yy)):
+
+                r_colors_tmp = r_colors.copy()
+                g_colors_tmp = g_colors.copy()
+                b_colors_tmp = b_colors.copy()
+
+                r_colors_tmp[x,y,:] = [1, 1, 0]
+                g_colors_tmp[x,y,:] = [1, 1, 0]
+                b_colors_tmp[x,y,:] = [1, 1, 0]
+
+                r_channel.update_colors(fill_colors=r_colors_tmp)
+                g_channel.update_colors(fill_colors=g_colors_tmp)
+                b_channel.update_colors(fill_colors=b_colors_tmp)
+                if count < len(conv_result.grid):
+
+                    self.add(conv_result.grid[count].square)
+                    count += 1
+                    self.wait(0.5)
+                #  break
+            #  break
+
+
+
+        self.wait(2)
+
+        self.wait(0.5)
+
 class RGBConv(ThreeDSceneSquareGrid):
 
     def construct(self):
