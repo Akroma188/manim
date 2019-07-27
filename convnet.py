@@ -49,7 +49,7 @@ class ThreeDSceneSquareGrid(ThreeDScene):
             def colors2rgb(self, colors, x, y):
                 # RGB image (scaled to [0,1])
                 if type(colors) == np.ndarray and colors.ndim == 3:
-                    color_rgb = tuple(fill_colors[x, y, :])
+                    color_rgb = tuple(colors[x, y, :])
                 # Grayscalage image (scaled to [0.1])
                 elif type(colors) == np.ndarray and colors.ndim == 2:
                     color_rgb = (colors[x, y], colors[x, y], colors[x, y])
@@ -89,6 +89,9 @@ class ThreeDSceneSquareGrid(ThreeDScene):
                         elif type(fill_opacities) == np.ndarray:
                             fill_opacity = fill_opacities[x, y]
 
+                        else:
+                            raise ValueError("check opacities value")
+
                         self.grid[cell_count].square.set_opacity(fill_opacity)
                         cell_count += 1
 
@@ -108,7 +111,7 @@ class ThreeDSceneSquareGrid(ThreeDScene):
                         current_z = cell.square.get_z()
                         cell.square.set_z(current_z + z_increment * step_size)
 
-        return Grid(xx, yy, fill_colors, fill_opacities=0.8, stroke_colors=(1.0, 1.0, 1.0), side_length=self.side_length)
+        return Grid(xx, yy, fill_colors, fill_opacities=fill_opacities, stroke_colors=stroke_colors, side_length=self.side_length)
 
 
 class SimpleGridExample(ThreeDSceneSquareGrid):
