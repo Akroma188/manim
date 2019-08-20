@@ -681,6 +681,73 @@ class Conv2D_depth(ThreeDSceneSquareGrid):
 
         self.wait(2)
 
+class global_pooling(ThreeDSceneSquareGrid):
+
+    def construct(self):
+
+        # Meshgrid defining bounds of grid
+        xx = np.arange(-6, -2)
+        yy = np.arange(-3, 1)
+
+        # Side length of each square cell in the grid
+        self.side_length = 0.9
+
+        r_colors = np.zeros(((len(xx), len(yy), 3)))
+        r_colors[:, :, 0] = 1
+
+        g_colors = np.zeros(((len(xx), len(yy), 3)))
+        g_colors[:, :, 1] = 1
+
+        b_colors = np.zeros(((len(xx), len(yy), 3)))
+        b_colors[:, :, 2] = 1
+
+        # Create a grid and display each cell in the grid
+        r_channel = self.create_grid(xx, yy, fill_colors=(1.0, 0.0, 0.0), fill_opacities=0.8, stroke_colors=(1.0, 1.0, 1.0), side_length=self.side_length)
+        g_channel = self.create_grid(xx, yy, fill_colors=(0, 1.0, 0.0), fill_opacities=0.6, stroke_colors=(1.0, 1.0, 1.0), side_length=self.side_length)
+        b_channel = self.create_grid(xx, yy, fill_colors=(0, 0, 1.0), fill_opacities=0.5, stroke_colors=(1.0, 1.0, 1.0), side_length=self.side_length)
+
+
+        self.move_camera(phi=0, gamma=0, distance=40)
+        for count, grid in enumerate([r_channel, g_channel, b_channel]):
+
+            # Necessary to display grids initially
+            grid.shift_grid(x_increment=count*1, y_increment=count*0.8, z_increment=count)
+            for cell in grid.grid:
+                self.add(cell.square)
+
+        self.wait(0.5)
+
+        # Add a bunch of depth layers
+        self.wait(0.5)
+
+        self.move_camera(phi=0, gamma=0, distance=50, frame_center=(0, 0, 20*self.side_length))
+        for n in range(3):
+
+
+            # Average pooling
+            if n == 0:
+                r_channel.update_colors(fill_colors=(1, 0.5, 0))
+                conv_result_n = self.create_grid(np.arange(2, 3), np.arange(-1, 0), fill_colors=(0.6, 0.1, 0.2), side_length=self.side_length)
+            if n == 1:
+                g_channel.update_colors(fill_colors=(1, 0.5, 0))
+                conv_result_n = self.create_grid(np.arange(2, 3), np.arange(-1, 0), fill_colors=(0.2, 0.6, 0.1), side_length=self.side_length)
+            if n == 2:
+                b_channel.update_colors(fill_colors=(1, 0.5, 0))
+                conv_result_n = self.create_grid(np.arange(2, 3), np.arange(-1, 0), fill_colors=(0.1, 0.2, 0.6), side_length=self.side_length)
+            self.wait(0.5)
+
+
+            conv_result_n.shift_grid(x_increment=0.5*(n+2), y_increment=0.5*(n+2), z_increment=0.5*(n+2))
+
+            for cell in conv_result_n.grid:
+                self.add(cell.square)
+
+            r_channel.update_colors(fill_colors=(1, 0, 0))
+            g_channel.update_colors(fill_colors=(0, 1, 0))
+            b_channel.update_colors(fill_colors=(0, 0, 1))
+            self.wait(0.5)
+
+        self.wait(2)
 
 
 class Conv2D_stride(ThreeDSceneSquareGrid):
