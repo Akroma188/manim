@@ -290,7 +290,7 @@ class RGBConv(ThreeDSceneSquareGrid):
                     self.add(g_output.grid[count].square)
                     self.add(r_output.grid[count].square)
                     count += 1
-                    self.wait(0.35)
+                    self.wait(0.15)
                     if jj != 5:
                         r_kernel.shift_grid(x_increment=1)
                         g_kernel.shift_grid(x_increment=1)
@@ -417,7 +417,7 @@ class Conv1D(ThreeDSceneSquareGrid):
         fill_colors = np.random.random((len(xx), 1, 3))
 
         self.move_camera(phi=0, gamma=0, frame_center=0, distance=0.1)
-        simple_grid = self.create_grid(xx, yy, fill_colors=(0, 0, 0.9), fill_opacities=1, side_length=self.side_length)
+        simple_grid = self.create_grid(xx, yy, fill_colors=(0, 0, 0.9), side_length=self.side_length)
 
         conv_result = self.create_grid(np.arange(-4,4), np.arange(-3, -2), fill_colors=(0, 0.8, 0), side_length=self.side_length)
 
@@ -425,7 +425,7 @@ class Conv1D(ThreeDSceneSquareGrid):
             self.add(cell.square)
 
 
-        kernel = self.create_grid(np.arange(-5, -2), np.arange(2, 3), fill_colors=(1, 1, 0), fill_opacities=0.1, side_length=self.side_length)
+        kernel = self.create_grid(np.arange(-5, -2), np.arange(2, 3), fill_colors=(1, 1, 0), side_length=self.side_length)
 
         for cell in kernel.grid:
             self.add(cell.square)
@@ -1009,6 +1009,7 @@ class MnistConvNet(ThreeDSceneSquareGrid):
         for cell in mnist_grid.grid:
             self.add(cell.square)
 
+        self.wait(0.5)
         xx = np.arange(-1, 2)
         yy = np.arange(14, 17)
 
