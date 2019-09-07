@@ -1,3 +1,9 @@
+This is a fork from 3b1b's [manim](https://github.com/3b1b/manim). It can be used as is to generate CNN animations found in my [cnn cheatsheet repo](https://github.com/jerpint/cnn-cheatsheet)
+
+To use it, follow the installation instructions below then run, for example:
+
+` python -m manim convnet.py Conv2D -p`
+
 <img src="logo/cropped.png"/>
 
 [![Build Status](https://travis-ci.org/3b1b/manim.svg?branch=master)](https://travis-ci.org/3b1b/manim)
@@ -58,9 +64,9 @@ python3 -m manim example_scenes.py SquareToCircle -pl
 
 ## Anaconda Install
 
-* Install sox and latex as above. 
+* Install sox and latex as above.
 * Create a conda environment using `conda env create -f environment.yml`
-* **WINDOWS ONLY** Install `pyreadline` via `pip install pyreadline`. 
+* **WINDOWS ONLY** Install `pyreadline` via `pip install pyreadline`.
 
 
 ### Using `virtualenv` and `virtualenvwrapper`
