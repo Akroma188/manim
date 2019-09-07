@@ -551,44 +551,50 @@ class Conv2D_strided(ThreeDSceneSquareGrid):
         self.side_length = 0.9
 
         self.move_camera(phi=3*PI/8, gamma=0)
-        xx = np.arange(-6, 0)
-        yy = np.arange(-3, 3)
 
-        simple_grid = self.create_grid(xx, yy, fill_colors=(0, 0, 0.9), side_length=self.side_length)
+        xx = np.arange(-9, 0)
+        yy = np.arange(-5, 4)
 
-        conv_result = self.create_grid(np.arange(3, 7), np.arange(-2, 2), fill_colors=(0, 0.8, 0), side_length=self.side_length)
+        stride2 = self.create_grid(xx, yy, fill_colors=(0, 0, 0.9), side_length=self.side_length)
 
-        for cell in simple_grid.grid:
-            self.add(cell.square)
+        for cell2 in stride2.grid:
+            self.add(cell2.square)
 
+        xx = np.arange(-9, -6)
+        yy = np.arange(1, 4)
 
-        xx = np.arange(-6, -3)
-        yy = np.arange(0, 3)
+        conv_result = self.create_grid(np.arange(4, 8), np.arange(-2, 2), fill_colors=(0, 0.8, 0), side_length=self.side_length)
 
-        kernel = self.create_grid(xx, yy, fill_colors=(1, 1, 0), side_length=self.side_length)
+        kernel2 = self.create_grid(xx, yy, fill_colors=(1, 1, 0), side_length=self.side_length)
 
-        for cell in kernel.grid:
-            self.add(cell.square)
+        for cell2 in kernel2.grid:
+            self.add(cell2.square)
 
         self.wait(2)
-        self.move_camera(phi=0, gamma=0, distance=50)
+        self.move_camera(phi=0, gamma=0, frame_center=(0, 0, 10*self.side_length))
 
         count = 0
-        for _ in range(4):
-            for jj in range(4):
+        for jj in range(49):
+
+
+            # Stride 2
+
+            if jj % 2 == 0 and jj < 32:
+                kk = jj / 2
+                if kk % 4 == 0 and kk != 0:
+                    kernel2.shift_grid(x_increment=-6, y_increment=-2)
+                elif kk != 0:
+                    kernel2.shift_grid(x_increment=2)
 
                 if count < len(conv_result.grid):
 
                     self.add(conv_result.grid[count].square)
                     count += 1
-                    self.wait(0.5)
-                    if jj != 3:
-                        kernel.shift_grid(x_increment=1)
 
-            if count < len(conv_result.grid):
-                kernel.shift_grid(x_increment=-3, y_increment=-1)
+            self.wait(0.5)
+            #  if count < len(conv_result.grid):
 
-        self.wait(2)
+        self.wait(1)
 
 class Conv2D_depth(ThreeDSceneSquareGrid):
 
@@ -783,7 +789,6 @@ class Conv2D_stride(ThreeDSceneSquareGrid):
         self.move_camera(phi=0, gamma=0, frame_center=(0, 0, 10*self.side_length))
 
         for jj in range(49):
-            #  kk = jj*2
 
                 #  if count < len(conv_result.grid):
 
