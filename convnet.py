@@ -878,6 +878,67 @@ class Conv2D_zeropad(ThreeDSceneSquareGrid):
         self.wait(2)
 
 
+class Conv2D_full_padding(ThreeDSceneSquareGrid):
+
+    def construct(self):
+
+        self.side_length = 0.9
+
+        self.move_camera(phi=3*PI/8, gamma=0)
+        xx = np.arange(-6, 0)
+        yy = np.arange(-3, 3)
+
+        simple_grid = self.create_grid(xx, yy, fill_colors=(0, 0, 0.9), side_length=self.side_length)
+        conv_result = self.create_grid(np.arange(3, 11), np.arange(-4, 4), fill_colors=(0, 0.8, 0), side_length=self.side_length)
+
+        xx = np.arange(-8, 2)
+        yy = np.arange(-5, 5)
+
+        #  zero_colors = np.zeros((
+        zero_pad = self.create_grid(xx, yy, fill_colors=(0.5, 0.5, 0.5))
+
+
+        for cell in zero_pad.grid:
+            self.add(cell.square)
+
+        for cell in simple_grid.grid:
+            self.add(cell.square)
+
+
+        xx = np.arange(-8, -5)
+        yy = np.arange(2, 5)
+
+        # Dilated kernel
+        #  xx = np.arange(-3, 3, step=2)
+        #  yy = np.arange(-3, 3, step=2)
+
+        kernel = self.create_grid(xx, yy, fill_colors=(1, 1, 0), side_length=self.side_length)
+
+        for cell in kernel.grid:
+            self.add(cell.square)
+
+        self.wait(2)
+        self.move_camera(phi=0, gamma=0, frame_center=(0, 0, 10*self.side_length))
+
+        self.wait(0.5)
+
+        count = 0
+        for _ in range(8):
+            for jj in range(8):
+
+                if count < len(conv_result.grid):
+
+                    self.add(conv_result.grid[count].square)
+                    count += 1
+                    self.wait(0.3)
+                    if jj != 7:
+                        kernel.shift_grid(x_increment=1)
+
+            if count < len(conv_result.grid):
+                kernel.shift_grid(x_increment=-7, y_increment=-1)
+
+        self.wait(2)
+
 class deConv2D(ThreeDSceneSquareGrid):
 
     def construct(self):
