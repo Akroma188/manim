@@ -1130,7 +1130,9 @@ class Pooling(ThreeDSceneSquareGrid):
         xx = np.arange(-4, -2)
         yy = np.arange(2, 4)
 
-        kernel = self.create_grid(xx, yy, fill_colors=(1, 1, 0), side_length=self.side_length)
+        kernel_cols = np.ones((2, 2, 3))
+        kernel_cols[:, :, 2] = 0
+        kernel = self.create_grid(xx, yy, fill_colors=kernel_cols, side_length=self.side_length)
 
         self.move_camera(phi=0, gamma=0, frame_center=(-8, 0, 10))
         self.wait(1)
@@ -1148,9 +1150,14 @@ class Pooling(ThreeDSceneSquareGrid):
 
                 if count < len(pool_result.grid):
 
+                    pool_cols = kernel_cols.copy()
+                    pool_cols[np.random.randint(0,2), np.random.randint(0,2), :] = [1, 0.5, 0]
+
+                    kernel.update_colors(pool_cols)
                     self.add(pool_result.grid[count].square)
                     count += 1
                     self.wait(0.5)
+                    kernel.update_colors(kernel_cols)
                     if jj != 3:
                         kernel.shift_grid(x_increment=2)
 
